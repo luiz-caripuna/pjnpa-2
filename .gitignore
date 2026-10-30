@@ -1,0 +1,45 @@
+# Dependências e Builds
+node_modules/
+dist/
+build/
+coverage/
+
+# Arquivos de Ambiente
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Caches
+.cache/
+.vite/
+.eslintcache
+
+# Editores e IDEs
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+*.swp
+*.swo
+
+# Arquivos de Sistema Operacional
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Arquivos de Instruções, PDFs e Pacotes de Entrega (SIGAA)
+# Não devem subir para o repositório
+*.pdf
+*.docx
+*.zip
+Trabalho_Grupo_01_Proposta.docx.pdf
+Trabalho_Grupo_01.zip
+landing-page-lucas-amazonia.zip
+orientacoes/
+instrucoes/

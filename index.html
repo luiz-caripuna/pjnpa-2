@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌿 Amazônia Store - Catálogo Interativo de Produtos</title>
+    <!-- Folha de estilos própria em CSS puro -->
+    <link rel="stylesheet" href="estilo.css">
+</head>
+
+<body>
+    <!-- Cabeçalho principal semântico -->
+    <header class="topo">
+        <div class="topo-conteudo">
+            <div class="marca">
+                <h1>🌿 Amazônia Store</h1>
+                <p class="subtitulo">Catálogo Interativo de Produtos com Consumo de API REST</p>
+            </div>
+
+            <!-- Controles superiores: alternador de tema e atalho para favoritos -->
+            <div class="topo-acoes">
+                <button id="botaoModoEscuro" class="botao-secundario" type="button" aria-label="Alternar modo escuro ou claro">
+                    🌙 Modo Escuro
+                </button>
+                <button id="botaoFavoritosTopo" class="botao-destaque" type="button" aria-label="Ver produtos favoritos">
+                    ❤️ Favoritos (<span id="contadorFavoritos">0</span>)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container-principal">
+        <!-- Seção de busca e filtros com formulário semântico -->
+        <section class="secao-filtros" aria-labelledby="tituloFiltros">
+            <h2 id="tituloFiltros" class="sr-only">Pesquisa e filtros de produtos</h2>
+
+            <form id="formularioBusca" class="formulario-busca" role="search">
+                <label for="campoBusca" class="sr-only">Pesquisar produto pelo nome</label>
+                <div class="campo-busca-grupo">
+                    <input 
+                        type="search" 
+                        id="campoBusca" 
+                        name="busca" 
+                        placeholder="Pesquisar produto por nome (ex: mascara, perfume, laptop, phone)..." 
+                        autocomplete="off"
+                    >
+                    <button type="submit" id="botaoPesquisar" class="botao-primario">
+                        🔍 Pesquisar
+                    </button>
+                    <button type="button" id="botaoLimparBusca" class="botao-secundario" title="Limpar pesquisa">
+                        ✕ Limpar
+                    </button>
+                </div>
+            </form>
+
+            <!-- Abas para alternar entre catálogo geral e lista de favoritos -->
+            <nav class="abas-navegacao" aria-label="Filtros de visualização">
+                <button id="abaTodos" class="aba-botao ativa" type="button">
+                    📦 Todos os Produtos
+                </button>
+                <button id="abaFavoritos" class="aba-botao" type="button">
+                    ❤️ Meus Favoritos (<span id="contadorAbaFavoritos">0</span>)
+                </button>
+            </nav>
+        </section>
+
+        <!-- Área de mensagens e status de carregamento / erros -->
+        <section id="areaStatus" class="area-status" aria-live="polite">
+            <!-- Mensagem de carregamento dinâmico -->
+            <div id="statusCarregando" class="status-card status-carregando escondido">
+                <div class="spinner"></div>
+                <p>Carregando produtos da API pública... Por favor, aguarde.</p>
+            </div>
+
+            <!-- Mensagem de erro de rede ou resposta HTTP -->
+            <div id="statusErro" class="status-card status-erro escondido">
+                <span class="status-icone">⚠️</span>
+                <div class="status-texto">
+                    <h3>Ops! Não foi possível carregar os dados.</h3>
+                    <p id="mensagemErroDetalhe">Verifique sua conexão ou tente novamente mais tarde.</p>
+                </div>
+                <button id="botaoTentarNovamente" class="botao-primario" type="button">🔄 Tentar Novamente</button>
+            </div>
+
+            <!-- Mensagem de lista vazia / nenhum resultado -->
+            <div id="statusVazio" class="status-card status-vazio escondido">
+                <span class="status-icone">🔍</span>
+                <p id="mensagemVazioTexto">Nenhum produto encontrado para a sua busca.</p>
+            </div>
+        </section>
+
+        <!-- Barra informativa com o total de itens listados -->
+        <section class="barra-resumo">
+            <p id="textoResumo">Exibindo produtos...</p>
+        </section>
+
+        <!-- Conteúdo principal: Grade de produtos gerada dinamicamente via DOM -->
+        <main id="conteudoPrincipal">
+            <section id="gradeProdutos" class="grade-produtos" aria-label="Lista de produtos"></section>
+        </main>
+    </div>
+
+    <!-- Modal para exibição dos Detalhes Adicionais do Produto Selecionado -->
+    <div id="modalDetalhes" class="modal-backdrop escondido" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+        <div class="modal-card">
+            <button id="botaoFecharModal" class="botao-fechar" type="button" aria-label="Fechar janela de detalhes">✕</button>
+
+            <div class="modal-corpo">
+                <div class="modal-imagem-container">
+                    <img id="modalImagem" src="" alt="Imagem do produto em detalhes">
+                </div>
+
+                <div class="modal-info">
+                    <span id="modalCategoria" class="badge-categoria">Categoria</span>
+                    <h2 id="modalTitulo">Nome do Produto</h2>
+                    
+                    <div class="modal-metadados">
+                        <span id="modalMarca" class="badge-info">Marca: -</span>
+                        <span id="modalAvaliacao" class="badge-avaliacao">⭐ 0.0</span>
+                        <span id="modalEstoque" class="badge-estoque">Estoque: -</span>
+                    </div>
+
+                    <div class="modal-precos">
+                        <span id="modalPreco" class="preco-destaque">$ 0.00</span>
+                        <span id="modalDesconto" class="desconto-tag">-0% OFF</span>
+                    </div>
+
+                    <div class="modal-secao">
+                        <h3>Descrição</h3>
+                        <p id="modalDescricao">Descrição detalhada do produto.</p>
+                    </div>
+
+                    <div class="modal-secao">
+                        <h3>Informações adicionais</h3>
+                        <ul class="lista-detalhes-extras">
+                            <li><strong>Código SKU:</strong> <span id="modalSku">-</span></li>
+                            <li><strong>Garantia:</strong> <span id="modalGarantia">-</span></li>
+                            <li><strong>Envio:</strong> <span id="modalEnvio">-</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="modal-rodape">
+                        <button id="modalBotaoFavorito" class="botao-primario" type="button">
+                            ❤️ Favoritar Produto
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rodapé semântico com identificação da equipe e disciplina -->
+    <footer class="rodape">
+        <div class="rodape-conteudo">
+            <p><strong>Universidade Federal do Oeste do Pará (UFOPA)</strong> — Programação Web</p>
+            <p><strong>Trabalho em Grupo 1:</strong> Desenvolvimento de uma Aplicação Web com consumo de API</p>
+            <div class="equipe-info">
+                <h4>Equipe de Desenvolvimento:</h4>
+                <ul>
+                    <li>Lucas Patrik Lopes dos Santos — Matrícula: 2021015036</li>
+                    <li>Luiz Otavio Caripuna da Cunha — Matrícula: 2022004270</li>
+                </ul>
+            </div>
+            <p class="rodape-creditos">Dados fornecidos pela API pública gratuita <a href="https://dummyjson.com/" target="_blank" rel="noopener noreferrer">DummyJSON Products</a>.</p>
+        </div>
+    </footer>
+
+    <!-- Script JavaScript puro com consumo de API e manipulação do DOM -->
+    <script src="script.js"></script>
+</body>
+
+</html>
